@@ -8,13 +8,17 @@ add_compile_definitions(MAGMA_VULKAN_ENABLED)
 
 
 add_subdirectory(vendor/Magma)
+#add_subdirectory(vendor/serial)
 
 add_executable(MagmaApp 
-app/src/main.cpp
+"app/src/main.cpp" 
+"app/src/setup.cpp"
+"app/src/ui.cpp" 
 )
 
 
 target_link_libraries(MagmaApp
 PRIVATE
 magma
+#serial
 )
