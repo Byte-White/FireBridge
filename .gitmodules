@@ -3,4 +3,4 @@
 	url = https://github.com/Byte-White/Magma
 [submodule "vendor/serial"]
 	path = vendor/serial
-	url = https://github.com/wjwwood/serial/
+	url = https://github.com/Byte-White/serial
