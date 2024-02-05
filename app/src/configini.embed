@@ -1,0 +1,30 @@
+const char g_configini[] = R"(
+[Window][DockSpaceViewport_11111111]
+Pos=0,0
+Size=960,540
+Collapsed=0
+
+[Window][Monitor]
+Pos=0,0
+Size=470,540
+Collapsed=0
+DockId=0x00000001,0
+
+[Window][Settings]
+Pos=472,0
+Size=488,540
+Collapsed=0
+DockId=0x00000003,0
+
+[Window][Debug##Default]
+Pos=60,60
+Size=400,400
+Collapsed=0
+
+[Docking][Data]
+DockSpace   ID=0x8B93E3BD Window=0xA787BDB4 Pos=0,0 Size=960,540 Split=X Selected=0xC7A77903
+  DockNode  ID=0x00000001 Parent=0x8B93E3BD SizeRef=470,540 CentralNode=1 Selected=0xC7A77903
+  DockNode  ID=0x00000003 Parent=0x8B93E3BD SizeRef=488,540 Selected=0x54723243
+
+
+)";

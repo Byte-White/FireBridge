@@ -1,13 +1,20 @@
 #include "application.h"
 #include "FiraCode.embed"
+#include "configini.embed"
+
+#include <iostream>
+#include <fstream>
+
 FireBridgeApplication::FireBridgeApplication()
 {
+    
 }
 
 FireBridgeApplication::~FireBridgeApplication()
 {
 
 }
+
 
 //Crimson shadow theme
 void FireBridgeApplication::SetupTheme()
@@ -70,6 +77,26 @@ void FireBridgeApplication::SetupTheme()
     style->Colors[ImGuiCol_DockingPreview] = ImVec4(0.85f, 0.86f, 0.00f, 1.00f);
 }
 
+static bool fileExists(const std::string& filename) 
+{
+    std::ifstream file(filename);
+    return file.good(); 
+}
+
+void FireBridgeApplication::CheckConfig()
+{
+    if (!fileExists("config.ini")) {
+        std::ofstream file("config.ini");
+        if (file.is_open())
+        {
+            file << g_configini;
+            MAGMA_INFO("Created a 'config.ini' file.");
+        }
+        else MAGMA_ERROR("Unable to create 'config.ini' file.");
+    } 
+    else MAGMA_INFO("'config.ini' file was found.");
+}
+
 void FireBridgeApplication::Init()
 {
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
@@ -83,4 +110,10 @@ void FireBridgeApplication::Init()
     fontConfig.FontDataOwnedByAtlas = false;
     ImFont* firacodeFont = io.Fonts->AddFontFromMemoryTTF((void*)g_FiraCode, sizeof(g_FiraCode)/ sizeof(unsigned char), 20.0f, &fontConfig);
     io.FontDefault = firacodeFont;
+    io.IniFilename = "config.ini";
+    
+    CheckConfig();
+
+    // get open ports
+    m_ports = serial::list_ports();
 }
