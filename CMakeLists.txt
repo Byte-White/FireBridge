@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.3)
 project(FireBridge)
 
 
-#add_compile_definitions(MAGMA_VULKAN_ENABLED)
-add_compile_definitions(MAGMA_OPENGL_ENABLED) 
-#set(MAGMA_EMSCRIPTEN ON)
+set(MAGMA_VULKAN ON)
+set(MAGMA_OPENGL OFF) 
+set(MAGMA_EMSCRIPTEN OFF)
 
 set(DISABLE_CATKIN ON)
 
