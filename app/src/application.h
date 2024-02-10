@@ -25,7 +25,7 @@ private:
 private:
 	struct MessageData {
 		std::string content;
-		std::chrono::steady_clock::time_point time;
+		std::tm* time;
 	};
 	std::vector<serial::PortInfo> m_ports;
 	std::vector<int> m_baudRates = { 4800, 9600, 19200, 38400, 57600, 115200 };

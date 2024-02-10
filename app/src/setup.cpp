@@ -101,7 +101,7 @@ void FireBridgeApplication::Init()
 {
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
-    SetSize(mode->width / 2, mode->height / 2);
+    SetSize(mode->width / 2 + 250, mode->height / 2 + 125);
     SetTitle("FireBridge");
 
     SetupTheme();

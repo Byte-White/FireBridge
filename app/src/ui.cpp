@@ -42,7 +42,12 @@ void FireBridgeApplication::Render()
             ImGui::EndCombo();
         }
         if (ImGui::Button("Refresh"))
+        {
+            std::string p = m_ports[m_selectedPortIndex].port;
             m_ports = serial::list_ports();
+            for (int i = 0; i < m_ports.size(); i++)
+                if (p == m_ports[i].port) m_selectedPortIndex = i;
+        }
         ImGui::SameLine();
         if (ImGui::Button("Connect"))
         {
@@ -74,20 +79,29 @@ void FireBridgeApplication::Render()
                 }
         }
         RADIO_BUTTON_TIMEMODE("display time [H:M:S]", TimeMode::TimeHMS);
-        RADIO_BUTTON_TIMEMODE("display time since the program has been started [ms]", TimeMode::SinceStartup);
+        RADIO_BUTTON_TIMEMODE("since the program has been started [ms]", TimeMode::SinceStartup);
         RADIO_BUTTON_TIMEMODE("OFF", TimeMode::OFF);
         ImGui::Checkbox("New line for each read", &m_newline);
         ImGui::Separator();
         ImGui::InputTextMultiline("message", m_message, 128);
         ImGui::SameLine();
-        ImGui::Button("Send");
-        ImGui::SeparatorText("Monitor");
-        if (ImGui::Button("Copy recieved to clipboard"))
+        if (ImGui::Button("Send") && m_serial)
         {
-            
+            m_serial->write(m_message);
+            memset(m_message, 0, sizeof(m_message));
+        }
+        ImGui::SeparatorText("Monitor");
+        if (ImGui::Button("Copy monitor to clipboard"))
+        {
+            std::string clip = "";
+
+            for each (auto msg in m_monitor)
+                clip += msg.content;
+
+            ImGui::SetClipboardText(clip.c_str());
         }
         ImGui::SameLine();
-        if(ImGui::Button("Clear recieved")) m_monitor.clear();
+        if(ImGui::Button("Clear monitor")) m_monitor.clear();
 		ImGui::End();
 	}
 
@@ -97,7 +111,9 @@ void FireBridgeApplication::Render()
         {
             MessageData data;
             data.content = m_serial->read(buff_size);
-            data.time = std::chrono::steady_clock::now();
+            auto timepoint = std::chrono::system_clock::now();
+            std::time_t currentTime_t = std::chrono::system_clock::to_time_t(timepoint);
+            data.time = std::localtime(&currentTime_t);
             m_monitor.emplace_back(data);
         }
     }
@@ -108,19 +124,17 @@ void FireBridgeApplication::Render()
         {
             for (auto i : m_monitor)
             {
-                auto time_since_epoch = i.time.time_since_epoch();
-                auto seconds = std::chrono::duration_cast<std::chrono::seconds>(time_since_epoch).count();
-                auto hours = seconds / 3600;
-                auto minutes = (seconds % 3600) / 60;
-                seconds = seconds % 60;
+                if (m_timemode == TimeMode::TimeHMS)
+                {
+                    ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.f),
+                        "[%02d:%02d:%02d]", i.time->tm_hour, i.time->tm_min, i.time->tm_sec
+                    );
 
-                if (m_timemode == TimeMode::TimeHMS)ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.f), 
-                    "[%02d:%02d:%02d]", hours,minutes,seconds
-                );
-
-                ImGui::SameLine();
+                    ImGui::SameLine(0.0F, 0.0F);
+                }
                 ImGui::Text(i.content.c_str());
-                //todo: if (!m_newline)
+                if(!m_newline && i.content[i.content.length()-1] != '\n')
+                    ImGui::SameLine(0.0F,0.0F);
             }
         }
         else
