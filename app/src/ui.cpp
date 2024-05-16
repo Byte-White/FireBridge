@@ -78,9 +78,12 @@ void FireBridgeApplication::Render()
                     connect_error = true;
                 }
         }
+
         RADIO_BUTTON_TIMEMODE("display time [H:M:S]", TimeMode::TimeHMS);
         RADIO_BUTTON_TIMEMODE("since the program has been started [ms]", TimeMode::SinceStartup);
+        RADIO_BUTTON_TIMEMODE("since connection [ms]", TimeMode::SinceConnection);
         RADIO_BUTTON_TIMEMODE("OFF", TimeMode::OFF);
+        
         ImGui::Checkbox("New line for each read", &m_newline);
         ImGui::Separator();
         ImGui::InputTextMultiline("message", m_message, 128);
@@ -132,6 +135,7 @@ void FireBridgeApplication::Render()
 
                     ImGui::SameLine(0.0F, 0.0F);
                 }
+
                 ImGui::Text(i.content.c_str());
                 if(!m_newline && i.content[i.content.length()-1] != '\n')
                     ImGui::SameLine(0.0F,0.0F);

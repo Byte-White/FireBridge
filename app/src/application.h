@@ -10,8 +10,9 @@ class FireBridgeApplication :public mg::Application
 	enum class TimeMode
 	{
 		OFF = 0,
-		TimeHMS,		// H:M:S:ms
-		SinceStartup,	// in ms
+		TimeHMS,		 // H:M:S:ms
+		SinceStartup,	 // in ms
+		SinceConnection, // in ms
 	}m_timemode = TimeMode::OFF;
 public:
 	FireBridgeApplication();
