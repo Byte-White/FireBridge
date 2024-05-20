@@ -16,7 +16,7 @@ add_executable(FireBridge
 "app/src/application.h" 
 "app/src/setup.cpp"
 "app/src/ui.cpp" 
-)
+ "app/src/SerialMonitor.h")
 
 target_include_directories(
 	FireBridge PUBLIC
