@@ -20,7 +20,7 @@ private:
 	void SetupTheme();
 	void CheckConfig();
 private:
-	SerialMonitor m_timemode = TimeMode::OFF;
+	TimeMode m_timemode = TimeMode::OFF;
 	
 	bool m_newline = true;
 	char m_message[128] = "";

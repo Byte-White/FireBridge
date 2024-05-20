@@ -18,7 +18,7 @@ void FireBridgeApplication::RenderConnectSettings()
         for (int i = 0; i < m_serialMonitor.GetPorts().size(); ++i)
         {
             const bool isSelected = (m_serialMonitor.GetSelectedPortIndex() == i);
-            if (ImGui::Selectable(m_ports[i].port.c_str(), isSelected))
+            if (ImGui::Selectable(m_serialMonitor.GetSelectedPort().port.c_str(), isSelected))
             {
                 m_serialMonitor.SelectPort(i);
             }
@@ -51,37 +51,29 @@ void FireBridgeApplication::RenderConnectSettings()
     {
         std::string p = m_serialMonitor.GetSelectedPort().port;
         m_serialMonitor.RefreshPorts();
-        for (int i = 0; i < m_ports.size(); i++)
-            if (p == m_ports[i].port) m_selectedPortIndex = i;
+        for (int i = 0; i < m_serialMonitor.GetPorts().size(); i++)
+            if (p == m_serialMonitor.GetPorts()[i].port) m_serialMonitor.SelectPort(i);
     }
     ImGui::SameLine();
     if (ImGui::Button("Connect"))
     {
         connect_error = false;
         connect_exception = "";
-        if (m_serial != nullptr) delete m_serial;
         try 
         {
-
-            m_serial = new serial::Serial(
-                m_ports[m_selectedPortIndex].port,
-                m_baudRates[m_selectedBaudRateIndex],
-                serial::Timeout::simpleTimeout(1000)
-            );
+            m_serialMonitor.Connect();
         }
         catch (std::exception e)
         {
-            //delete m_serial;
-            m_serial = nullptr;
+            m_serialMonitor.FreeSerial();
             connect_error = true;
             connect_exception = e.what();
         }
 
         if (!connect_error)
-            if (!m_serial->isOpen())
+            if (!m_serialMonitor.GetSerial()->isOpen())
             {
-                delete m_serial;
-                m_serial = nullptr;
+                m_serialMonitor.FreeSerial();
                 connect_error = true;
             }
     }
@@ -104,7 +96,7 @@ void FireBridgeApplication::RenderSettings()
     ImGui::Separator();
     ImGui::InputTextMultiline("message", m_message, 128);
     ImGui::SameLine();
-    if (ImGui::Button("Send") && m_serial)
+    if (ImGui::Button("Send") && m_serialMonitor.GetSerial())
     {
         m_serialMonitor.Write(m_message);
         memset(m_message, 0, sizeof(m_message));
@@ -123,12 +115,12 @@ void FireBridgeApplication::RenderSettings()
     if (ImGui::Button("Clear monitor")) m_monitor.clear();
     ImGui::End();
 
-    if (m_serial != nullptr)
+    if (m_serialMonitor.GetSerial() != nullptr)
     { // saves data if available and if connected
-        if (int buff_size = m_serial->available())
+        if (int buff_size = m_serialMonitor.GetSerial()->available())
         {
             MessageData data;
-            data.content = m_serial->read(buff_size);
+            data.content = m_serialMonitor.GetSerial()->read(buff_size);
             auto timepoint = std::chrono::system_clock::now();
             std::time_t currentTime_t = std::chrono::system_clock::to_time_t(timepoint);
             data.time = std::localtime(&currentTime_t);
@@ -141,7 +133,7 @@ void FireBridgeApplication::RenderMonitor()
 
 {
     ImGui::Begin("Monitor");
-    if (m_serial != nullptr)
+    if (m_serialMonitor.GetSerial() != nullptr)
     {
         for (auto i : m_serialMonitor.GetMonitor())
         {

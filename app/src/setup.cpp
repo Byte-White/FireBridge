@@ -115,5 +115,5 @@ void FireBridgeApplication::Init()
     CheckConfig();
 
     // get open ports
-    m_ports = serial::list_ports();
+    m_serialMonitor.RefreshPorts();
 }
