@@ -23,8 +23,6 @@ struct MessageData
 class SerialMonitor
 {
 public:
-	void ClearMonitor();
-	void Write(const char* message);
 	inline std::vector<MessageData>& GetMonitor() { return m_monitor; }
 	
 	void RefreshPorts() { m_ports = serial::list_ports(); }
@@ -46,8 +44,8 @@ public:
 
 
 	inline const std::vector<int>& GetBaudRates() { return m_baudRates; }
-	inline const int& GetSelectedBaudRates() { return m_baudRates[m_selectedBaudRateIndex]; }
-	inline const int GetSelectedBaudRatesIndex() { return m_selectedBaudRateIndex; }
+	inline const int& GetSelectedBaudRate() { return m_baudRates[m_selectedBaudRateIndex]; }
+	inline const int GetSelectedBaudRateIndex() { return m_selectedBaudRateIndex; }
 	void SelectBaudRate(int newBaudRateIndex) { m_selectedPortIndex = newBaudRateIndex; }
 
 	serial::Serial* GetSerial() { return m_serial; }

@@ -3,6 +3,8 @@
 #define RADIO_BUTTON_TIMEMODE(msg,mode) if (ImGui::RadioButton(msg, (m_timemode == mode)))m_timemode = mode;
 
 
+static bool connect_error = false;
+static std::string connect_exception = "";
 
 
 void FireBridgeApplication::Render()
@@ -81,8 +83,6 @@ void FireBridgeApplication::RenderConnectSettings()
 
 void FireBridgeApplication::RenderSettings()
 {
-    static bool connect_error = false;
-    static std::string connect_exception = "";
     ImGui::Begin("Settings");
 
     RenderConnectSettings();
@@ -98,21 +98,21 @@ void FireBridgeApplication::RenderSettings()
     ImGui::SameLine();
     if (ImGui::Button("Send") && m_serialMonitor.GetSerial())
     {
-        m_serialMonitor.Write(m_message);
+        m_serialMonitor.GetSerial()->write(m_message);
         memset(m_message, 0, sizeof(m_message));
     }
     ImGui::SeparatorText("Monitor");
     if (ImGui::Button("Copy monitor to clipboard"))
     {
         std::string clip = "";
-
-        for each (auto msg in m_monitor)
+        
+        for (auto msg : m_serialMonitor.GetMonitor())
             clip += msg.content;
 
         ImGui::SetClipboardText(clip.c_str());
     }
     ImGui::SameLine();
-    if (ImGui::Button("Clear monitor")) m_monitor.clear();
+    if (ImGui::Button("Clear monitor")) m_serialMonitor.GetMonitor().clear();
     ImGui::End();
 
     if (m_serialMonitor.GetSerial() != nullptr)
@@ -124,7 +124,7 @@ void FireBridgeApplication::RenderSettings()
             auto timepoint = std::chrono::system_clock::now();
             std::time_t currentTime_t = std::chrono::system_clock::to_time_t(timepoint);
             data.time = std::localtime(&currentTime_t);
-            m_monitor.emplace_back(data);
+            m_serialMonitor.GetMonitor().emplace_back(data);
         }
     }
 }
