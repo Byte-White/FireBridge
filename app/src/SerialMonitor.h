@@ -46,7 +46,7 @@ public:
 	inline const std::vector<int>& GetBaudRates() { return m_baudRates; }
 	inline const int& GetSelectedBaudRate() { return m_baudRates[m_selectedBaudRateIndex]; }
 	inline const int GetSelectedBaudRateIndex() { return m_selectedBaudRateIndex; }
-	void SelectBaudRate(int newBaudRateIndex) { m_selectedPortIndex = newBaudRateIndex; }
+	void SelectBaudRate(int newBaudRateIndex) { m_selectedBaudRateIndex = newBaudRateIndex; }
 
 	serial::Serial* GetSerial() { return m_serial; }
 

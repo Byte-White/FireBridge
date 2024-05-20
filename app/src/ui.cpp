@@ -20,7 +20,7 @@ void FireBridgeApplication::RenderConnectSettings()
         for (int i = 0; i < m_serialMonitor.GetPorts().size(); ++i)
         {
             const bool isSelected = (m_serialMonitor.GetSelectedPortIndex() == i);
-            if (ImGui::Selectable(m_serialMonitor.GetSelectedPort().port.c_str(), isSelected))
+            if (ImGui::Selectable(m_serialMonitor.GetPorts()[i].port.c_str(), isSelected))
             {
                 m_serialMonitor.SelectPort(i);
             }
