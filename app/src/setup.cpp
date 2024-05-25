@@ -5,9 +5,11 @@
 #include <iostream>
 #include <fstream>
 
+
+
 FireBridgeApplication::FireBridgeApplication()
 {
-    
+    m_startupTime = GetLocalTime();
 }
 
 FireBridgeApplication::~FireBridgeApplication()

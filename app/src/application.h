@@ -24,6 +24,8 @@ private:
 	
 	bool m_newline = true;
 	char m_message[128] = "";
+	
+	std::tm* m_startupTime;
 
 	SerialMonitor m_serialMonitor;
 };

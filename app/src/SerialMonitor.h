@@ -9,10 +9,14 @@
 enum class TimeMode
 {
 	OFF = 0,
-	TimeHMS,		 // H:M:S:ms
-	SinceStartup,	 // in ms
-	SinceConnection, // in ms
+	TimeHMS,				// H:M:S:ms
+	RelativeToStartupHMS,	// H:M:S:ms
+	SinceStartup,			// in ms
+	SinceConnection,		// in ms
 };
+
+std::tm* GetLocalTime();
+
 
 struct MessageData
 {
@@ -20,9 +24,13 @@ struct MessageData
 	std::tm* time;
 };
 
+
 class SerialMonitor
 {
 public:
+	SerialMonitor()
+	{
+	}
 	inline std::vector<MessageData>& GetMonitor() { return m_monitor; }
 	
 	void RefreshPorts() { m_ports = serial::list_ports(); }
@@ -39,6 +47,7 @@ public:
 
 	inline std::vector<serial::PortInfo>& GetPorts() { return m_ports; }
 	inline serial::PortInfo& GetSelectedPort() { return m_ports[m_selectedPortIndex]; }
+	
 	inline const int GetSelectedPortIndex() { return m_selectedPortIndex; }
 	void SelectPort(int newPortIndex) { m_selectedPortIndex = newPortIndex; }
 
@@ -68,5 +77,4 @@ private:
 	serial::Serial* m_serial = nullptr;
 	std::vector<MessageData> m_monitor;
 };
-
 #endif

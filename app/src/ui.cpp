@@ -7,6 +7,13 @@ static bool connect_error = false;
 static std::string connect_exception = "";
 
 
+std::tm* GetLocalTime()
+{
+    auto timepoint = std::chrono::system_clock::now();
+    std::time_t currentTime_t = std::chrono::system_clock::to_time_t(timepoint);
+    return std::localtime(&currentTime_t);
+}
+
 void FireBridgeApplication::Render()
 {
     RenderSettings();
@@ -15,22 +22,30 @@ void FireBridgeApplication::Render()
 
 void FireBridgeApplication::RenderConnectSettings()
 {
-    if (ImGui::BeginCombo("Port COM", m_serialMonitor.GetSelectedPort().port.c_str()))
+    if (m_serialMonitor.GetPorts().size() > 0)
     {
-        for (int i = 0; i < m_serialMonitor.GetPorts().size(); ++i)
+        if (ImGui::BeginCombo("Port COM", m_serialMonitor.GetSelectedPort().port.c_str()))
         {
-            const bool isSelected = (m_serialMonitor.GetSelectedPortIndex() == i);
-            if (ImGui::Selectable(m_serialMonitor.GetPorts()[i].port.c_str(), isSelected))
+            for (int i = 0; i < m_serialMonitor.GetPorts().size(); ++i)
             {
-                m_serialMonitor.SelectPort(i);
+                const bool isSelected = (m_serialMonitor.GetSelectedPortIndex() == i);
+                if (ImGui::Selectable(m_serialMonitor.GetPorts()[i].port.c_str(), isSelected))
+                {
+                    m_serialMonitor.SelectPort(i);
+                }
+                if (isSelected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
             }
-            if (isSelected)
-            {
-                ImGui::SetItemDefaultFocus();
-            }
+            ImGui::EndCombo();
         }
-        ImGui::EndCombo();
     }
+    else
+    {
+        ImGui::Text("NO PORTS AVAILABLE.");
+    }
+
 
     if (ImGui::BeginCombo("Baud Rate", std::to_string(m_serialMonitor.GetSelectedBaudRate()).c_str()))
     {
@@ -61,7 +76,7 @@ void FireBridgeApplication::RenderConnectSettings()
     {
         connect_error = false;
         connect_exception = "";
-        try 
+        try
         {
             m_serialMonitor.Connect();
         }
@@ -88,6 +103,7 @@ void FireBridgeApplication::RenderSettings()
     RenderConnectSettings();
 
     RADIO_BUTTON_TIMEMODE("display time [H:M:S]", TimeMode::TimeHMS);
+    RADIO_BUTTON_TIMEMODE("display time relative to startup[H:M:S]", TimeMode::RelativeToStartupHMS);
     RADIO_BUTTON_TIMEMODE("since the program has been started [ms]", TimeMode::SinceStartup);
     RADIO_BUTTON_TIMEMODE("since connection [ms]", TimeMode::SinceConnection);
     RADIO_BUTTON_TIMEMODE("OFF", TimeMode::OFF);
@@ -105,7 +121,7 @@ void FireBridgeApplication::RenderSettings()
     if (ImGui::Button("Copy monitor to clipboard"))
     {
         std::string clip = "";
-        
+
         for (auto msg : m_serialMonitor.GetMonitor())
             clip += msg.content;
 
@@ -121,9 +137,7 @@ void FireBridgeApplication::RenderSettings()
         {
             MessageData data;
             data.content = m_serialMonitor.GetSerial()->read(buff_size);
-            auto timepoint = std::chrono::system_clock::now();
-            std::time_t currentTime_t = std::chrono::system_clock::to_time_t(timepoint);
-            data.time = std::localtime(&currentTime_t);
+            data.time = GetLocalTime();
             m_serialMonitor.GetMonitor().emplace_back(data);
         }
     }
@@ -137,14 +151,23 @@ void FireBridgeApplication::RenderMonitor()
     {
         for (auto i : m_serialMonitor.GetMonitor())
         {
-            if (m_timemode == TimeMode::TimeHMS)
+            switch (m_timemode)
             {
+            case TimeMode::TimeHMS:
                 ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.f),
                     "[%02d:%02d:%02d]", i.time->tm_hour, i.time->tm_min, i.time->tm_sec
                 );
-
                 ImGui::SameLine(0.0F, 0.0F);
+                break;
+            case TimeMode::RelativeToStartupHMS:
+                ImGui::TextColored(ImVec4(0.f, 1.f, 0.f, 1.f),
+                    "[%02d:%02d:%02d]", i.time->tm_hour - m_startupTime->tm_hour,
+                    i.time->tm_min - m_startupTime->tm_min,
+                    i.time->tm_sec - m_startupTime->tm_sec
+                ); // will be changed in the future
+                break;
             }
+
 
             ImGui::Text(i.content.c_str());
             if (!m_newline && i.content[i.content.length() - 1] != '\n')
